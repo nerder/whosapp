@@ -9,8 +9,8 @@ var casper = require('casper').create({
     width: 1280,
     height: 1024
   },
-  waitTimeout: 15000,
-  logLevel: 'debug',
+  waitTimeout: 100000,
+  logLevel: 'error',
   verbose: true
 });
 
@@ -40,18 +40,49 @@ casper.on("page.initialized", function(page) {
     };
 });
 
+var takeScreeshot = function(){
+  casper.capture('qrcode.png',
+    {
+      top: 214,
+      left: 296,
+      width: 250,
+      height: 250
+    }
+  );
+  casper.echo('QR Screeshot Taken!');
+}
+
+var getDataRef = function() {
+  return casper.evaluate(function test(){
+    return $(".qrcode").attr("data-ref");
+  });
+}
+
+var isQrCodeChanged = function(dataRef){
+  return casper.evaluate(function(dataRef) {
+    return $(".qrcode").attr("data-ref") !==  dataRef;
+  }, dataRef);
+}
+
 casper.start('https://web.whatsapp.com/', function(){
     this.echo('Starting...')
     this.waitForSelector('img', function() {
-        this.capture('qrcode.png',
-          {
-            top: 214,
-            left: 296,
-            width: 250,
-            height: 250
+        this.echo('QrCode is Loaded...');
+        takeScreeshot();
+        var dataRef = getDataRef();
+        var checkIfChanged = false;
+
+        this.waitFor(function check() {
+          checkIfChanged = isQrCodeChanged(dataRef);
+          if (checkIfChanged){
+            dataRef = getDataRef();
+            takeScreeshot();
           }
-        );
-        this.echo('QR Screeshot Taken!')
+          //I return false, in this way waitFor will never end
+          return false;
+        }, function then() {
+           this.echo("I DONT wanna be called, EVER");
+        });
     });
 });
 casper.run();
