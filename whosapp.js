@@ -22,7 +22,6 @@ casper.on("remote.message", function(msg) {
 // http://docs.casperjs.org/en/latest/events-filters.html#page-error
 casper.on("page.error", function(msg, trace) {
     this.echo("Error: " + msg);
-    this.echo("Trace:" + JSON.stringify(trace, undefined, 4));
     // maybe make it a little fancier with the code from the PhantomJS equivalent
 });
 
@@ -70,11 +69,11 @@ casper.start('https://web.whatsapp.com/', function(){
         this.echo('QrCode is Loaded...');
         takeScreeshot();
         var dataRef = getDataRef();
-        var checkIfChanged = false;
+        // var changed = false;
 
         this.waitFor(function check() {
-          checkIfChanged = isQrCodeChanged(dataRef);
-          if (checkIfChanged){
+          // changed = isQrCodeChanged(dataRef);
+          if (isQrCodeChanged(dataRef)){
             dataRef = getDataRef();
             takeScreeshot();
           }
