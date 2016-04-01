@@ -40,48 +40,79 @@ casper.on("page.initialized", function(page) {
 });
 
 var takeScreeshot = function(){
-  casper.capture('qrcode.png',
-    {
-      top: 214,
-      left: 296,
-      width: 250,
-      height: 250
-    }
+  casper.capture('qrcode.png'
+    // {
+    //   top: 214,
+    //   left: 296,
+    //   width: 250,
+    //   height: 250
+    // }
   );
   casper.echo('QR Screeshot Taken!');
-}
+};
+
+  var isLoggedIn = function(){
+    return casper.evaluate(function(){
+      return !!$(".avatar").length;
+    });
+  };
 
 var getDataRef = function() {
-  return casper.evaluate(function test(){
+  return casper.evaluate(function(){
     return $(".qrcode").attr("data-ref");
   });
-}
+};
 
-var isQrCodeChanged = function(dataRef){
+var isQrCodeChanged = function(dataRef) {
   return casper.evaluate(function(dataRef) {
     return $(".qrcode").attr("data-ref") !==  dataRef;
   }, dataRef);
+};
+
+var isEmptyText = function() {
+  return casper.evaluate(function(){
+    return !!$(".empty-text").length;
+  });
 }
 
-casper.start('https://web.whatsapp.com/', function(){
-    this.echo('Starting...')
-    this.waitForSelector('img', function() {
-        this.echo('QrCode is Loaded...');
-        takeScreeshot();
-        var dataRef = getDataRef();
-        // var changed = false;
+var searchPerson = function(person) {
+  casper.sendKeys('.input-search', person);
+};
 
-        this.waitFor(function check() {
-          // changed = isQrCodeChanged(dataRef);
-          if (isQrCodeChanged(dataRef)){
-            dataRef = getDataRef();
-            takeScreeshot();
-          }
-          //I return false, in this way waitFor will never end
-          return false;
-        }, function then() {
-           this.echo("I DONT wanna be called, EVER");
-        });
-    });
+var needToSearch = function () {
+  return casper.evaluate(function(){
+    return  $(".chat").length > 0 && $(".chat").length !== 1;
+  });
+};
+
+casper.start('https://web.whatsapp.com/', function(){
+  this.echo('Starting...');
+  this.waitForSelector('img', function() {
+    this.echo('QrCode is Loaded...');
+    takeScreeshot();
+    var dataRef = getDataRef();
+    // var changed = false;
+
+    this.waitFor(function check() {
+      // changed = isQrCodeChanged(dataRef);
+      if (isQrCodeChanged(dataRef)){
+        dataRef = getDataRef();
+        takeScreeshot();
+      }
+      return isLoggedIn();
+    }, function then() {
+       this.waitFor(function hangme() {
+         if(needToSearch()) {
+           searchPerson('Davide Capozzi');
+           isEmptyText() ? this.echo("Not FOUND!") : this.echo("Got IT");
+         } else {
+           this.echo("Do something now!");
+         }
+         return false;
+       }, function then() {
+        this.echo('Nobody calls me! SOB')
+       });
+     });
+  });
 });
 casper.run();
