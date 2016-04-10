@@ -39,8 +39,8 @@ casper.on("page.initialized", function(page) {
   };
 });
 
-var setTarger = function() {
-  return 'Davide Capozzi';
+var setTarget = function() {
+  return 'xxx';
 }
 
 var takeScreeshot = function() {
@@ -118,7 +118,7 @@ casper.start('https://web.whatsapp.com/', function() {
       }
       return isLoggedIn();
     }, function then() {
-      var stalkedPerson = setTarger();
+      var stalkedPerson = setTarget();
       this.waitFor(function hangme() {
         if (needToSearch()) {
           searchPerson(stalkedPerson);
