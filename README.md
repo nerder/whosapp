@@ -1,3 +1,3 @@
-# whosapp
+# whosup
 
-Because paranoid has never been so sweet!
+Because being paranoid has never been so sweet!
