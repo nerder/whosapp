@@ -1,5 +1,6 @@
 *.jpg
 *.png
+*.txt
 
 ### OSX ###
 .DS_Store
